@@ -1,0 +1,15 @@
+<h1>Регистрацию в магазине {$wa->shop->settings("name")|escape}</h1>
+
+<p>Здравствуйте, {$contact->get('name')}! Вы прошли регистрацию в нашем магазине {$wa->shop->settings("name")|escape}</p>
+<p>
+    Логин: {$login}<br />
+    Пароль: {$password}<br />
+</p>
+
+
+
+<p>--<br />
+    {$wa->shop->settings("name")|escape}<br />
+    <a href="mailto:{$wa->shop->settings("email")}">{$wa->shop->settings("email")}</a><br />
+    {$wa->shop->settings("phone")}<br />
+</p>

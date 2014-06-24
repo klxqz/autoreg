@@ -1,0 +1,18 @@
+<script>
+    $(function() {
+        {*скрытие стандлартного блока "Зарегистрироваться как постоянный покупатель"*}
+        $('#create-user').closest('.wa-field').hide();
+    });
+</script>
+
+{*Вывод чекбокса с запросом подписки*}
+{if $mailer_exists && $mailer_subscribe == 'manually'}
+    <div style="clear: both;"></div>
+    <div class="wa-form">
+        <div class="wa-field">
+            <div class="wa-value">
+                <label><input id="mailer-subscribe" type="checkbox" value="1" name="mailer_subscribe"> Получать информацию об акциях и распродажах</label>
+            </div>
+        </div>
+    </div>
+{/if}

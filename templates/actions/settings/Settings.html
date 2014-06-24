@@ -1,0 +1,149 @@
+<style type="text/css">
+    #wa .CodeMirror{
+        border: 1px solid #eee;
+    }
+    .CodeMirror-scroll {
+        height: auto;
+        overflow-y: hidden;
+        overflow-x: auto;
+    }
+</style>
+<h1>Принудительная регистрация</h1>
+<div     class="fields form">
+    <form action="?plugin=autoreg&action=saveSettings" method="post" id="plugins-settings-form">
+        {$wa->csrf()}
+
+
+        <div class="field">
+            <div class="name">
+                Статус плагина
+            </div>
+            <div class="value">
+                <select name="shop_autoreg[status]">
+                    <option {if $settings.status == 1} selected="selected"{/if} value="1">Включен</option>
+                    <option {if $settings.status == 0} selected="selected"{/if} value="0">Выключен</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field">
+            <div class="name">
+                Длина генерируемого пароля
+            </div>
+            <div class="value">
+                <input type="text" name="shop_autoreg[length]" value="{$settings.length|escape}" />
+            </div>
+        </div>
+
+
+        <div class="field">
+            <div class="name">
+                Тема Emai-сообщения
+            </div>
+            <div class="value">
+                <input type="text" name="shop_autoreg[subject]" value="{$settings.subject|escape}" />
+            </div>
+        </div>
+        {*
+        <div class="field">
+        <div class="name">
+        Текст Email-сообщения<br><span class="hint">HTML + Smarty</span>
+        </div>
+        <div class="value no-shift">
+        <div id="s-editor-core-wrapper">
+        <textarea id="sf-template" class="body" name="template_path">{$template|escape}</textarea>
+
+        </div>
+        </div>
+
+        {if $change_tpl}
+        <div class="value">
+        <p class="gray"><i class="icon16 exclamation"></i>Внимание! Шаблон по умолчанию был изменен</p>
+        <input type="checkbox" name="reset_tpl" value="1"  /> - Сбросить изменения, использовать шаблон по умолчанию
+        </div>
+        {/if}
+        </div>
+        *}
+
+        {foreach $tpls as $key => $tpl}
+            <div class="field">
+                <div class="name">{$tpl.name}<br /><span class="hint">HTML + Smarty</span></div>
+                <div class="value no-shift">
+                    <div id="s-editor-core-wrapper">
+                        <textarea id="sf-template-{$key}" class="body" name="templates[{$key}]">{$tpl.content|escape}</textarea>
+                    </div>
+                </div>
+
+                {if $tpl.change_tpl}
+                    <div class="value">
+                        <p class="gray"><i class="icon16 exclamation"></i>Внимание! Шаблон по умолчанию был изменен</p>
+                        <input type="checkbox" name="reset_tpls[{$key}]" value="1"  /> - Сбросить изменения, использовать шаблон по умолчанию
+                    </div>
+                {/if}
+            </div>
+        {/foreach}
+
+
+        <div class="field">
+            <div class="name">
+                Подписка на рассылки(Для использования данной возможности должно быть установлено приложение «Рассылка»)
+            </div>
+            <div class="value">
+                <select name="shop_autoreg[mailer_subscribe]">
+                    <option {if $settings.mailer_subscribe == 'off'}selected="selected"{/if} value="off">Подписка выключена</option>
+                    <option {if $settings.mailer_subscribe == 'auto'}selected="selected"{/if} value="auto">Автоматическая подписка</option>
+                    <option {if $settings.mailer_subscribe == 'manually'}selected="selected"{/if} value="manually">Спросить согласие на подписку</option>
+                </select>
+            </div>
+        </div>
+
+
+
+        <div class="field">
+            <div class="value submit">
+                <input type="submit" class="button green" value="Сохранить">
+                <span id="plugins-settings-form-status" style="display:none">
+                    <i style="vertical-align:middle" class="icon16 yes"></i> [`Saved`]
+                </span>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function() {
+        var ids = [{foreach $tpls as $key => $tpl}"sf-template-{$key}",{/foreach}];
+                for (var i = 0; i < ids.length; i++) {
+            var c = CodeMirror.fromTextArea(document.getElementById(ids[i]), {
+                mode: "text/html",
+                tabMode: "indent",
+                height: "dynamic",
+                lineWrapping: true
+            });
+            $(ids[i]).change(function() {
+                c.setValue($(this).val())
+            });
+            $(ids[i]).submit(function() {
+                var f = $(this);
+                $.post(f.attr('action'), f.serialize(), function(response) {
+                    if (response.status == 'ok') {
+                        $('#wa-design-button').removeClass('red').addClass('green');
+                        $("#wa-editor-status-fail").hide()
+                        $("#wa-editor-status-ok span").html(response.data.message);
+                        $("#wa-editor-status-ok").fadeIn('slow', function() {
+                            $(this).fadeOut(1000);
+                        });
+                    } else {
+                        $('#wa-design-button').removeClass('green').addClass('red');
+                        $("#wa-editor-status-ok").hide();
+                        $("#wa-editor-status-fail span").html(response.errors.join(', '));
+                        $("#wa-editor-status-fail").fadeIn('slow');
+                    }
+                }, "json")
+                return false;
+            });
+
+        }
+
+
+    });
+</script>
