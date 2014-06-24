@@ -2,10 +2,21 @@
 
 class shopAutoregPlugin extends shopPlugin {
 
+    public static function changePasswordForm() {
+        $template_path = wa()->getDataPath('plugins/autoreg/templates/ChangePasswordForm.html', false, 'shop', true);
+        if (!file_exists($template_path)) {
+            $template_path = wa()->getAppPath('plugins/autoreg/templates/ChangePasswordForm.html', 'shop');
+        }
+        $view = wa()->getView();
+        $html = $view->fetch($template_path);
+        return $html;
+    }
+
     public function frontendCheckout($params) {
         if (!$this->getSettings('status')) {
             return false;
         }
+        $html = '';
 
         if ($params['step'] == 'contactinfo') {
             $template_path = wa()->getDataPath('plugins/autoreg/templates/ContactInfo.html', false, 'shop', true);
@@ -18,29 +29,28 @@ class shopAutoregPlugin extends shopPlugin {
                 'mailer_subscribe' => $this->getSettings('mailer_subscribe')
             ));
             $html = $view->fetch($template_path);
-            return $html;
         }
 
 
         if (wa()->getUser()->isAuth()) {
-            return false;
+            return $html;
         }
         $checkout_data = wa()->getStorage()->get('shop/checkout');
         $contact = isset($checkout_data['contact']) && ($checkout_data['contact'] instanceof waContact) ? $checkout_data['contact'] : new waContact();
 
         $login = $contact->get('email', 'default');
         if (!$login) {
-            return false;
+            return $html;
         }
 
         $email_validator = new waEmailValidator();
         if (!$email_validator->isValid($login)) {
-            return false;
+            return $html;
         }
 
         $contact_model = new waContactModel();
         if ($contact_model->getByEmail($login, true)) {
-            return false;
+            return $html;
         }
 
         $contact->set('create_method', 'autoref-plugin');
@@ -52,11 +62,10 @@ class shopAutoregPlugin extends shopPlugin {
         $contact->save();
         wa()->getAuth()->auth($contact);
         //$this->setSessionData('contact', $contact);
-
         //Добавляем подписку
-        if (($this->getSettings('mailer_subscribe') == 'manually' && waRequest::post('mailer_subscribe', 0)) || $this->getSettings('mailer_subscribe') == 'auto') {
+        if (wa()->appExists('mailer') && ($this->getSettings('mailer_subscribe') == 'manually' && waRequest::post('mailer_subscribe', 0)) || $this->getSettings('mailer_subscribe') == 'auto') {
             try {
-                $this->addSubscribe();
+                $this->addSubscribe($contact->getId(), $login);
             } catch (Exception $ex) {
                 
             }
@@ -95,44 +104,8 @@ class shopAutoregPlugin extends shopPlugin {
         return $pass;
     }
 
-    public function addSubscribe($name, $email) {
+    public function addSubscribe($contact_id, $email) {
 
-        if (!$locale || !waLocale::getInfo($locale)) {
-            $locale = wa()->getLocale();
-        }
-
-
-        // Validate email
-        $email = trim($email);
-        if (!$email) {
-            throw new waException('No email to subscribe.', 404);
-        }
-        $ev = new waEmailValidator();
-        if (!$ev->isValid($email)) {
-            throw new waException('Email is invalid.', 404);
-        }
-
-        // Get contact_id by email
-        $cem = new waContactEmailsModel();
-        $contact_id = $cem->getContactIdByNameEmail($name, $email);
-        if (!$contact_id) {
-            $contact_id = $cem->getContactIdByEmail($email);
-        }
-
-        // Create new contact if no id found
-        if (!$contact_id) {
-            $contact = new waContact();
-            $contact['locale'] = $locale;
-            $contact['email'] = $email;
-            if ($name) {
-                $contact['name'] = $name;
-            }
-            $contact['create_method'] = 'subscriber';
-            if ($contact->save()) {
-                throw new waException('Unable to create contact.', 500);
-            }
-            $contact_id = $contact->getId();
-        }
 
         // Remove contact from unsubscribers
         $um = new mailerUnsubscriberModel();

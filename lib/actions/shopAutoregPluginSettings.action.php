@@ -13,6 +13,11 @@ class shopAutoregPluginSettingsAction extends waViewAction {
             'path' => 'plugins/autoreg/templates/ContactInfo.html',
             'change_tpl' => false,
         ),
+        'ChangePasswordForm' => array(
+            'name' => 'Шаблон формы изменения пароля в личном кабинете',
+            'path' => 'plugins/autoreg/templates/ChangePasswordForm.html',
+            'change_tpl' => false,
+        ),
     );
     //protected $tpl_path = 'plugins/autoreg/templates/EmaiMessage.html';
     protected $plugin_id = array('shop', 'autoreg');

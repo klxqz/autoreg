@@ -4,16 +4,9 @@ class shopAutoregPluginBackendSavesettingsController extends waJsonController {
 
     protected $plugin_id = array('shop', 'autoreg');
     protected $tpls = array(
-        'EmaiMessage' => array(
-            'name' => 'Текст Email-сообщения',
-            'path' => 'plugins/autoreg/templates/EmaiMessage.html',
-            'change_tpl' => false,
-        ),
-        'ContactInfo' => array(
-            'name' => 'Шаблон выводимый на шаге контактной информации',
-            'path' => 'plugins/autoreg/templates/ContactInfo.html',
-            'change_tpl' => false,
-        ),
+        'EmaiMessage' => array('tpl_path' => 'plugins/autoreg/templates/EmaiMessage.html'),
+        'ContactInfo' => array('tpl_path' => 'plugins/autoreg/templates/ContactInfo.html'),
+        'ChangePasswordForm' => array('tpl_path' => 'plugins/autoreg/templates/ChangePasswordForm.html'),
     );
 
     public function execute() {
