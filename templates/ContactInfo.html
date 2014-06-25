@@ -1,7 +1,15 @@
+<script type="text/javascript" src="{$wa_url}wa-content/js/jquery-plugins/jquery.cookie.js"></script>
 <script>
     $(function() {
-        {*скрытие стандлартного блока "Зарегистрироваться как постоянный покупатель"*}
+    {*скрытие стандлартного блока "Зарегистрироваться как постоянный покупатель"*}
         $('#create-user').closest('.wa-field').hide();
+        $('#mailer-subscribe').click(function() {
+            if ($(this).attr('checked')) {
+                $.cookie('mailer_subscribe', 1);
+            } else {
+                $.cookie('mailer_subscribe', 0);
+            }
+        });
     });
 </script>
 
